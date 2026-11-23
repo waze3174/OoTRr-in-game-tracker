@@ -21,9 +21,11 @@ The link step fails if the module needs a symbol that's neither defined nor in `
 game, and a few libc functions, checked in the game's sdk). `readelf -r bin/ootrTracker.elf | grep JUMP_SLOT` must print nothing: a
 JUMP_SLOT would be an import bound lazily inside this module.
 
-The tool ships a copy of `bin/subsdk7`, in this repository at `ootr_tracker/resources/subsdk7`. After a change,
-run `make ship` (it builds, copies the binary there and prints its sha256 and size), update that folder's `SOURCE.md`
-with the version and the printed values, and commit (the tool's tests check the checksum).
+The tool ships a copy of `bin/subsdk7`, in this repository at `ootr_tracker/resources/subsdk7`. That file is the one the
+CI builds (the `module` job, in the Docker image of the pinned devkitA64, uploads it as the artifact `subsdk7`): another
+devkitA64 gives another binary from the same source, so a build on a PC (`make`) is for trying, and `make ship` copies
+such a build only for a local test. After a change, put the CI's artifact there, update that folder's `SOURCE.md` with
+the version, the checksum and the size, and commit (the tool's tests check the checksum).
 
 The build embeds `PACKAGE_VERSION`, by default the version in `VERSION` and `git describe` of the repository (it appears in the log's
 `loaded ...` line). The build id hashes the debug information, which records the folder the module was built in, so the Makefile maps

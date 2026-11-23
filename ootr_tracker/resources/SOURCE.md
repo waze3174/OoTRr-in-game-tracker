@@ -16,9 +16,13 @@ later (the text is in `LICENSE-GPL3` here), built from [ocarinaMIDI](https://git
 - Version 0.8.0 (seed files of version 5, with the names' choice). It grew from the module of OotrR's fork
   (`ingame_tracker/` of [waze3174/OotrR](https://github.com/waze3174/OotrR), commit `dcc4734`, version 0.7.2); `module/` here is
   that source plus the names' choice.
-- Built with devkitA64: `make PACKAGE_VERSION="0.8.0"` in `module/` gives this binary again, byte for byte from any folder
-  (the build embeds `0.8.0`); `make ship PACKAGE_VERSION="0.8.0"` copies a build here
-- sha256 of `subsdk7`: `bfe0584946a7fd3fcd2f169226db31bef1c9969204508a52f7a4cf3fe16f472b` (111,754 bytes)
+- Built by the repository's CI with devkitA64 in the Docker image `devkitpro/devkita64` (tag 20260219, digest
+  `sha256:1fc388c3a0d34bd2045a6dadcb1020e069d5f876a187fd705de14b4440c00282`): `make PACKAGE_VERSION="0.8.0"` in `module/`
+  there gives this binary again, byte for byte from any folder (the build embeds `0.8.0`), and the `module` job of
+  `.github/workflows/build.yml` rebuilds it and compares. Another devkitA64 (a newer one on a PC, say) compiles the same
+  source to another, equally valid binary, so the shipped one always comes from that job (its artifact `subsdk7`).
+- sha256 of `subsdk7`: `b83382e52c10622b73b5db549793e5b8ce2212cb78363cca0fbd5756220d889d` (112,435 bytes)
 
-To change the module, change `module/`, run `make ship` there (it copies the new build here and prints its checksum and
-size), and update this file's version and checksum (the tests check that the checksum matches the binary).
+To change the module, change `module/`, let the CI build it (its `module` job fails until the shipped file is the one it
+builds), put that artifact here, and update this file's version, checksum and size (the tests check that the checksum matches
+the binary).

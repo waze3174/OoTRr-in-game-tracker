@@ -176,9 +176,9 @@ python -m unittest discover -s tests -t .      # the tool's tests (no game neede
 make -C module test                            # the module's tests on the PC (a C compiler and Python)
 ```
 
-The module builds with devkitA64 (`module/docs/BUILDING.md`); `make ship` in `module/` copies the new build into
-`ootr_tracker/resources/`. The prebuilt module is reproducible: `make PACKAGE_VERSION="0.8.0"` gives the shipped
-file byte for byte, and CI checks it. Frozen builds: `packaging/build_windows.cmd` (Windows) and `packaging/build_linux.sh`
+The module builds with devkitA64 (`module/docs/BUILDING.md`). The prebuilt module is the one the CI builds in a pinned
+devkitA64 image (`ootr_tracker/resources/SOURCE.md`): `make PACKAGE_VERSION="0.8.0"` in that image gives the shipped
+file byte for byte, and CI checks it (a build with another devkitA64 differs). Frozen builds: `packaging/build_windows.cmd` (Windows) and `packaging/build_linux.sh`
 (Linux), both PyInstaller; the GitHub Actions workflow builds both.
 
 `docs/seed-file-format.md` documents `seed.trk`, `icons.bin` and the console's mailbox.

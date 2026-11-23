@@ -22,8 +22,6 @@ jobs:
 
   module:
     runs-on: ubuntu-22.04
-    permissions:
-      contents: write
     # The toolchain is pinned: another devkitA64 makes another binary. This is the image tagged 20260219.
     container: devkitpro/devkita64@sha256:1fc388c3a0d34bd2045a6dadcb1020e069d5f876a187fd705de14b4440c00282
     steps:
@@ -35,19 +33,6 @@ jobs:
           version=$(sed -n 's/.*embeds `\([^`]*\)`.*/\1/p' ootr_tracker/resources/SOURCE.md | head -n1)
           make -C module PACKAGE_VERSION="$version"
           sha256sum module/bin/subsdk7
-      - name: Keep the build on the branch ci-subsdk7
-        if: always() && github.event_name == 'push'
-        run: |
-          cp module/bin/subsdk7 /tmp/subsdk7
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@users.noreply.github.com"
-          git checkout -q --orphan ci-subsdk7
-          git rm -rfq .
-          cp /tmp/subsdk7 subsdk7
-          sha256sum subsdk7 > subsdk7.sha256
-          git add subsdk7 subsdk7.sha256
-          git commit -qm "module built by the pinned toolchain"
-          git push -f origin ci-subsdk7
       - uses: actions/upload-artifact@v4
         if: always()
         with:
