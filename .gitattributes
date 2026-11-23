@@ -1,0 +1,7 @@
+* text=auto
+subsdk7 binary
+*.trk binary
+*.bin binary
+*.sh text eol=lf
+Makefile text eol=lf
+*.cmd text eol=crlf
