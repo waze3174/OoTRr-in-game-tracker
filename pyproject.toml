@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ootr-ingame-tracker"
+version = "0.1.0"
+description = "In-game tracker for seeds of Moz's Ocarina of Time randomizer (OotrR): a companion mod and an Archipelago console bridge"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT (the tool); GPL-3.0-or-later (module/ and the prebuilt module)" }
+dependencies = ["zstandard>=0.23,<1", "websockets>=13,<16"]
+
+[project.scripts]
+ootr-tracker = "ootr_tracker.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["ootr_tracker*"]
+
+[tool.setuptools.package-data]
+ootr_tracker = ["resources/*"]
