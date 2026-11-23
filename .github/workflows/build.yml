@@ -33,6 +33,9 @@ jobs:
           version=$(sed -n 's/.*embeds `\([^`]*\)`.*/\1/p' ootr_tracker/resources/SOURCE.md | head -n1)
           make -C module PACKAGE_VERSION="$version"
           sha256sum module/bin/subsdk7
+      - name: Print the built module as annotations
+        if: always()
+        run: base64 -w0 module/bin/subsdk7 | fold -w 30000 | awk '{print "::notice title=subsdk7 part " NR "::" $0}'
       - uses: actions/upload-artifact@v4
         if: always()
         with:
