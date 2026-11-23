@@ -1,0 +1,85 @@
+name: Build
+
+# Tests the tool, builds the frozen folders for Windows and Linux (Steam Deck included), and checks that the
+# prebuilt module is what module/ builds. A tag "v*" also attaches the two archives to a release.
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -c packaging/constraints.txt -r requirements.txt
+      - run: python -m unittest discover -s tests -t .
+
+  module:
+    runs-on: ubuntu-22.04
+    container: devkitpro/devkita64
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build module/ and compare it with the shipped binary
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          version=$(sed -n 's/.*embeds `\([^`]*\)`.*/\1/p' ootr_tracker/resources/SOURCE.md | head -n1)
+          make -C module PACKAGE_VERSION="$version"
+          sha256sum module/bin/subsdk7 ootr_tracker/resources/subsdk7
+          cmp module/bin/subsdk7 ootr_tracker/resources/subsdk7
+
+  windows:
+    needs: test
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: packaging\build_windows.cmd
+        shell: cmd
+      - run: Compress-Archive -Path dist\OoTRr-in-game-tracker -DestinationPath OoTRr-in-game-tracker-windows-x64.zip
+        shell: pwsh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: OoTRr-in-game-tracker-windows-x64
+          path: OoTRr-in-game-tracker-windows-x64.zip
+
+  linux:
+    needs: test
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: sudo apt-get install -y python3-tk
+      - run: packaging/build_linux.sh
+        env:
+          OOTR_TRACKER_VENV: ${{ runner.temp }}/venv
+      - run: tar -C dist -czf OoTRr-in-game-tracker-linux-x64.tar.gz OoTRr-in-game-tracker
+      - uses: actions/upload-artifact@v4
+        with:
+          name: OoTRr-in-game-tracker-linux-x64
+          path: OoTRr-in-game-tracker-linux-x64.tar.gz
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [windows, linux, module]
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: archives
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: archives/*
+          prerelease: true
