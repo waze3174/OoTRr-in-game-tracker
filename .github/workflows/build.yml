@@ -22,14 +22,24 @@ jobs:
 
   module:
     runs-on: ubuntu-22.04
-    container: devkitpro/devkita64
+    # The toolchain is pinned: another devkitA64 makes another binary. This is the image tagged 20260219.
+    container: devkitpro/devkita64@sha256:1fc388c3a0d34bd2045a6dadcb1020e069d5f876a187fd705de14b4440c00282
     steps:
       - uses: actions/checkout@v4
-      - name: Build module/ and compare it with the shipped binary
+      - name: Build module/ with the pinned toolchain
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          aarch64-none-elf-gcc --version | head -n1
           version=$(sed -n 's/.*embeds `\([^`]*\)`.*/\1/p' ootr_tracker/resources/SOURCE.md | head -n1)
           make -C module PACKAGE_VERSION="$version"
+          sha256sum module/bin/subsdk7
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: subsdk7
+          path: module/bin/subsdk7
+      - name: Compare it with the shipped binary
+        run: |
           sha256sum module/bin/subsdk7 ootr_tracker/resources/subsdk7
           cmp module/bin/subsdk7 ootr_tracker/resources/subsdk7
 
